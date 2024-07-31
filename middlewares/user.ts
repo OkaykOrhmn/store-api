@@ -37,7 +37,7 @@ const token = header("Authorization")
 
 export const validatiors = {
     editName: [appId, username, token],
-    register: [username, password, token],
+    register: [username, password],
     login: [token],
     users: [userList, token],
     user: [userId, token],

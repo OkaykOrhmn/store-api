@@ -5,7 +5,8 @@ import { authentication } from "../middlewares/auth";
 
 const router = express.Router()
 
-router.get('/login', validatiors.login, authentication.auth, userController.getUser);
+router.get('/profile', validatiors.login, authentication.auth, userController.getUser);
+router.post('/login', validatiors.register, userController.loginUser);
 router.post('/register', validatiors.register, userController.postUser);
 router.put('/user/username', validatiors.editName, authentication.auth, userController.putUsername);
 router.delete('/user/delete', validatiors.user, authentication.auth, userController.deleteUser);

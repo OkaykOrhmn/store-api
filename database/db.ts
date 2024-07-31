@@ -18,7 +18,6 @@ class User {
                     id: true,
                     username: true,
                     password: false,
-                    cars: true,
                 }
 
             }
@@ -43,7 +42,7 @@ class User {
                 id: true,
                 username: true,
                 password: false,
-                cars: true,
+
             }
         });
         return user;
@@ -62,7 +61,7 @@ class User {
                 id: true,
                 username: true,
                 password: false,
-                cars: true,
+
             }
         });
         return updatedUser;
@@ -78,7 +77,7 @@ class User {
                 id: true,
                 username: true,
                 password: false,
-                cars: true,
+
             }
         }
         );
@@ -91,9 +90,7 @@ class User {
                 where: {
                     username: username
                 },
-                select: {
-                    password: true,
-                }
+
             }
         );
 
@@ -106,7 +103,7 @@ class User {
                 id: true,
                 username: true,
                 password: false,
-                cars: true,
+                
             }
         });
         return users;
@@ -130,7 +127,7 @@ class User {
                         id: true,
                         username: true,
                         password: false,
-                        cars: true,
+                        
                     }
 
                 });
@@ -155,3 +152,53 @@ class User {
 }
 
 export const userDb = new User();
+
+class Product {
+    async getProductById(req: Request) {
+        const id = req.params.id;
+        const user = await prisma.product.findUnique(
+            {
+                where: {
+                    id: Number(id)
+                },
+
+
+            }
+        );
+
+        return user;
+    }
+
+    async getProducts() {
+        const products = await prisma.product.findMany({
+            select: {
+                id: true,
+                name: true,
+                price: true,
+                isAvailable: true,
+                mainImageUrl: true,
+                rate: true,
+                category: true
+            }
+        });
+        return products;
+    }
+
+    async createProduct(req: Request) {
+        const { highlights, ...data } = req.body;
+        const product = await prisma.product.create({
+            data: {
+                ...data,
+                highlights: {
+                    createMany: {
+                        data: highlights
+                    }
+                }
+            }
+        });
+        return product;
+    }
+}
+
+export const productDb = new Product();
+

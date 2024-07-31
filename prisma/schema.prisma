@@ -14,17 +14,46 @@ datasource db {
   url = env("DATABASE_URL")
 }
 
-model Car{
-  id Int @id @default(autoincrement())
-  model String
-  year Int
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
-}
+// model Car{
+//   id Int @id @default(autoincrement())
+//   model String
+//   year Int
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   userId Int
+// }
 
 model User {
   id Int @id @default(autoincrement())
   username String @unique 
   password String
-  cars Car[]
+  // cars Car[]
+}
+
+model Product{
+  id Int @id @default(autoincrement())
+  name String  @unique
+  price String
+  isAvailable Boolean
+  mainImageUrl String
+  banners String[]
+  rate Float
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+  description String
+  highlights Highlight[]
+}
+
+model Highlight{
+  id Int @id @default(autoincrement())
+  name String
+  desc String
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+
+}
+
+model Category{
+  id Int @id @default(autoincrement())
+  name String
+  product Product[]
 }

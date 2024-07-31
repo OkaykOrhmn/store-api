@@ -12,11 +12,16 @@ class PasswordCreate {
     async verifyPassword(password: string, username: string) {
         const user = await userDb.getUserPasswordByUsername(username);
         if (user === undefined || user === null) {
-            return false;
-        } else {
-            const isValid = await bcrypt.compare(password, user.password);
-            return isValid;
+            return { user: user, isValid: false };
         }
+        const isValid = await bcrypt.compare(password, user.password);
+        if (isValid) {
+            return { user: user, isValid: true };
+
+        }
+
+        return { user: user, isValid: false };
+
     }
 
 }

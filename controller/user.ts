@@ -4,6 +4,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { authentication, CustomRequest } from "../middlewares/auth";
 import { JwtPayload } from "jsonwebtoken";
 import validRequest from "../utils/validationResult";
+import { passwordCreate } from "../utils/passwordCreate";
 
 class User {
     async getUser(req: Request, res: Response) {
@@ -27,6 +28,37 @@ class User {
 
             res.status(500).json({ status: 500, message: e });
         }
+
+    }
+
+    async loginUser(req: Request, res: Response) {
+        validRequest(req, res);
+        var { username, password } = req.body;
+
+        try {
+            const { user, isValid } = await passwordCreate.verifyPassword(password, username);
+            if (user === undefined || user === null) {
+                res.status(400).json({ status: 400, message: `User Not Exist!` });
+
+            } else {
+                if (isValid) {
+                    const token = await authentication.create(user.id, user.username);
+                    res.status(200).json({ status: 200, user: { id: user.id, username: user.username }, token: token });
+
+                } else {
+                    res.status(400).json({ status: 400, message: `Password is Wrong!!` });
+
+                }
+
+            }
+
+        } catch (e) {
+
+            res.status(500).json({ status: 500, message: e });
+        }
+
+
+
 
     }
 
