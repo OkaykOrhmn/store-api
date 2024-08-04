@@ -25,15 +25,17 @@ class Product {
 
     }
 
-    async getNewProducts(req: Request, res: Response) {
-        validRequest(req, res);
+    async getProducts(req: Request, res: Response) {
+        validRequest(req, res)
 
         try {
-            const products = await productDb.getProducts();
+            const sort = req.query.sort;
+            const level = req.query.level;
+            const take = req.query.take;
+            const products = await productDb.getProducts(sort, level, take);
 
             if (products === undefined || products === null) {
                 res.status(400).json({ status: 400, message: `products Not Exist!` });
-
             } else {
                 res.status(200).json({ status: 200, newProducts: products });
 

@@ -7,6 +7,13 @@ export interface CustomRequest extends Request {
     token: string | JwtPayload;
 }
 
+export interface CustomError {
+    name: string,
+    message: string,
+    expiredAt: string
+}
+
+
 class Authentication {
     async create(id: number, username: string) {
         if (!process.env.JWT_SECRET_KEY) {
@@ -40,7 +47,11 @@ class Authentication {
 
             next();
         } catch (err) {
-            res.status(500).send({ status: 500, message: err });
+            if ((err as CustomError).name === 'TokenExpiredError') {
+                return res.status(401).send({ status: 401, message: 'نشست منقضی شده است' });
+
+            }
+            return res.status(500).send({ status: 500, message: err });
         }
     }
 }

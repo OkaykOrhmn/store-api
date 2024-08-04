@@ -32,7 +32,7 @@ model User {
 model Product{
   id Int @id @default(autoincrement())
   name String  @unique
-  price String
+  price Float @default(0)
   isAvailable Boolean
   mainImageUrl String
   banners String[]
@@ -41,6 +41,7 @@ model Product{
   categoryId Int
   description String
   highlights Highlight[]
+  createdAt DateTime  @default(now())
 }
 
 model Highlight{
@@ -55,5 +56,6 @@ model Highlight{
 model Category{
   id Int @id @default(autoincrement())
   name String
+  imageUrl String
   product Product[]
 }

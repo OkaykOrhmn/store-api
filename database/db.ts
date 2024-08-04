@@ -1,8 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { Request } from "express";
 import { passwordCreate } from "../utils/passwordCreate"
-
 const prisma = new PrismaClient();
+
 
 class User {
 
@@ -161,6 +161,10 @@ class Product {
                 where: {
                     id: Number(id)
                 },
+                include: {
+                    category: true,
+                    highlights: true
+                }
 
 
             }
@@ -169,7 +173,28 @@ class Product {
         return user;
     }
 
-    async getProducts() {
+    async getProducts(order?: any, highest?: any, take?: any) {
+        highest = (highest + '').toLowerCase() === 'true'
+        var orderBy = {};
+        switch (order) {
+            case 'time':
+                orderBy = { createdAt: highest ? 'asc' : 'desc' }
+                break;
+            case 'money':
+                orderBy = { price: highest ? 'asc' : 'desc' }
+
+                break;
+            case 'rate':
+                orderBy = { rate: highest ? 'asc' : 'desc' }
+
+                break;
+
+            default:
+                break;
+        }
+
+        const t = take === undefined || take === null ? undefined : Number(take);
+
         const products = await prisma.product.findMany({
             select: {
                 id: true,
@@ -178,8 +203,11 @@ class Product {
                 isAvailable: true,
                 mainImageUrl: true,
                 rate: true,
-                category: true
-            }
+                category: true,
+                createdAt: true
+            },
+            take: t,
+            orderBy: orderBy
         });
         return products;
     }
@@ -201,4 +229,15 @@ class Product {
 }
 
 export const productDb = new Product();
+
+class category {
+    async getCategories(take?: any) {
+
+        const t = take === undefined || take === null ? undefined : Number(take);
+
+        const categories = await prisma.category.findMany({ take: t });
+        return categories;
+    }
+}
+export const categoryDb = new category();
 

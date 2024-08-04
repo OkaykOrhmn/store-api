@@ -33,6 +33,8 @@ const highlights = body('highlights')
     .isArray()
     .withMessage(validationMessages.isArray);
 
+
+
 export const validatiors = {
     productId: [productId],
     product: [name, price, isAvailable, mainImageUrl, category, description, highlights],

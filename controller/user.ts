@@ -38,7 +38,7 @@ class User {
         try {
             const { user, isValid } = await passwordCreate.verifyPassword(password, username);
             if (user === undefined || user === null) {
-                res.status(400).json({ status: 400, message: `User Not Exist!` });
+                res.status(400).json({ status: 400, message: `!!کاربر وجود ندارد` });
 
             } else {
                 if (isValid) {
@@ -46,7 +46,7 @@ class User {
                     res.status(200).json({ status: 200, user: { id: user.id, username: user.username }, token: token });
 
                 } else {
-                    res.status(400).json({ status: 400, message: `Password is Wrong!!` });
+                    res.status(400).json({ status: 400, message: `!!رمز اشتباه است` });
 
                 }
 
@@ -78,7 +78,7 @@ class User {
             }
         } catch (e) {
             if (e instanceof PrismaClientKnownRequestError) {
-                res.status(422).json({ status: 422, message: "User is Already Exist" });
+                res.status(422).json({ status: 422, message: "!!کاربر وجود دارد" });
                 return;
             }
             res.status(500).json({ status: 500, message: e });
