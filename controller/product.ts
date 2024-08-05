@@ -33,13 +33,8 @@ class Product {
         validRequest(req, res)
 
         try {
-            const sort = req.query.sort;
-            const level = req.query.level;
-            const take = req.query.take;
-            const categoryId = req.query.categoryId;
-            const search = req.query.search;
-            const token = (req as CustomRequest).token as JwtPayload;
-            const products = await productDb.getProducts(sort, level, take, categoryId, search, token.id);
+
+            const products = await productDb.getProducts(req);
 
             if (products === undefined || products === null) {
                 res.status(400).json({ status: 400, message: `products Not Exist!` });

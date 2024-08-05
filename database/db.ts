@@ -1,7 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import { Request } from "express";
 import { passwordCreate } from "../utils/passwordCreate"
-import { count, log } from "console";
+import { authentication, CustomRequest } from "../middlewares/auth";
+import { JwtPayload } from "jsonwebtoken";
+
 const prisma = new PrismaClient();
 
 
@@ -180,10 +182,18 @@ class Product {
         return user;
     }
 
-    async getProducts(order?: any, highest?: any, take?: any, categoryId?: any, search?: any, userId?: number) {
-        highest = (highest + '').toLowerCase() === 'true'
+    async getProducts(req: Request) {
+        const page = req.query.page;
+        const sort = req.query.sort;
+        const level = req.query.level;
+        const take = req.query.take;
+        const categoryId = req.query.categoryId;
+        const search = req.query.search;
+        const token = (req as CustomRequest).token as JwtPayload;
+        const userId = token.id;
+        const highest = (level + '').toLowerCase() === 'true'
         var orderBy = {};
-        switch (order) {
+        switch (sort) {
             case 'time':
                 orderBy = { createdAt: highest ? 'asc' : 'desc' }
                 break;
@@ -201,8 +211,14 @@ class Product {
         }
 
         const t = take === undefined || take === null ? undefined : Number(take);
+        const p = page === undefined || page === null ? undefined : Number(page);
         const ci = categoryId === undefined || categoryId === null ? undefined : Number(categoryId);
-        const s = search === undefined || search === null ? undefined : search;
+        const s: any = search === undefined || search === null ? undefined : search;
+        var skip: any;
+        if ((t !== undefined && t !== null) && (p !== undefined && p !== null)) {
+            skip = t * p;
+        }
+
         const products = await prisma.product.findMany({
             select: {
                 id: true,
@@ -220,6 +236,7 @@ class Product {
                 }
             },
             take: t,
+            skip: skip,
             orderBy: orderBy,
             where: {
                 categoryId: ci,
