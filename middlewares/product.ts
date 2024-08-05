@@ -33,11 +33,17 @@ const highlights = body('highlights')
     .isArray()
     .withMessage(validationMessages.isArray);
 
+const like = body('like')
+    .isBoolean()
+    .withMessage(validationMessages.isBool);
+
 
 
 export const validatiors = {
     productId: [productId],
     product: [name, price, isAvailable, mainImageUrl, category, description, highlights],
     isAvailable: [isAvailable],
+    like: [productId, like],
+
 
 };

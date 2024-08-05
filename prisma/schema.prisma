@@ -26,6 +26,7 @@ model User {
   id Int @id @default(autoincrement())
   username String @unique 
   password String
+  likes Like[]
   // cars Car[]
 }
 
@@ -42,6 +43,7 @@ model Product{
   description String
   highlights Highlight[]
   createdAt DateTime  @default(now())
+  likes Like[]
 }
 
 model Highlight{
@@ -58,4 +60,12 @@ model Category{
   name String
   imageUrl String
   product Product[]
+}
+
+model Like{
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int 
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  @@id([userId, productId])
 }

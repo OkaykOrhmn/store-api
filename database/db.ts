@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { Request } from "express";
 import { passwordCreate } from "../utils/passwordCreate"
+import { count, log } from "console";
 const prisma = new PrismaClient();
 
 
@@ -163,7 +164,13 @@ class Product {
                 },
                 include: {
                     category: true,
-                    highlights: true
+                    highlights: true,
+                    likes: {
+                        where: {
+                            userId: Number(req.params.userId)
+                        },
+
+                    }
                 }
 
 
@@ -173,7 +180,7 @@ class Product {
         return user;
     }
 
-    async getProducts(order?: any, highest?: any, take?: any, categoryId?: any, search?: any) {
+    async getProducts(order?: any, highest?: any, take?: any, categoryId?: any, search?: any, userId?: number) {
         highest = (highest + '').toLowerCase() === 'true'
         var orderBy = {};
         switch (order) {
@@ -196,7 +203,6 @@ class Product {
         const t = take === undefined || take === null ? undefined : Number(take);
         const ci = categoryId === undefined || categoryId === null ? undefined : Number(categoryId);
         const s = search === undefined || search === null ? undefined : search;
-
         const products = await prisma.product.findMany({
             select: {
                 id: true,
@@ -206,7 +212,12 @@ class Product {
                 mainImageUrl: true,
                 rate: true,
                 category: true,
-                createdAt: true
+                createdAt: true,
+                likes: {
+                    where: {
+                        userId: userId
+                    },
+                }
             },
             take: t,
             orderBy: orderBy,
@@ -216,8 +227,10 @@ class Product {
                     contains: s,
                     mode: "insensitive"
                 }
-            }
+            },
+
         });
+
         return products;
     }
 
@@ -249,4 +262,58 @@ class category {
     }
 }
 export const categoryDb = new category();
+
+class Like {
+    async setLike(req: Request) {
+        const like = await prisma.like.create({
+            data: {
+                productId: Number(req.params.id),
+                userId: Number(req.params.userId)
+            }
+        });
+        if (like === undefined || like === null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    async removeLike(req: Request) {
+
+        const like = await prisma.like.deleteMany({
+            where: {
+                AND: [
+                    { productId: Number(req.params.id) },
+                    { userId: Number(req.params.userId) }
+                ]
+            }
+        });
+        console.log(like.count);
+
+        if (like.count === 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    async getLike(userId: number, productId: number) {
+
+        const like = await prisma.like.findUnique({
+            where: {
+                userId_productId: {
+                    userId: userId,
+                    productId: productId
+                }
+            }
+        });
+        if (like === undefined || like === null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+}
+
+export const likeDb = new Like();
 
