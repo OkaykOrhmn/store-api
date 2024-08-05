@@ -216,7 +216,10 @@ class Product {
         const s: any = search === undefined || search === null ? undefined : search;
         var skip: any;
         if ((t !== undefined && t !== null) && (p !== undefined && p !== null)) {
-            skip = t * p;
+            if (p != 0) {
+                skip = t * (p - 1);
+
+            }
         }
 
         const products = await prisma.product.findMany({
