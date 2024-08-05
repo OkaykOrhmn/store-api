@@ -32,7 +32,9 @@ class Product {
             const sort = req.query.sort;
             const level = req.query.level;
             const take = req.query.take;
-            const products = await productDb.getProducts(sort, level, take);
+            const categoryId = req.query.categoryId;
+            const search = req.query.search;
+            const products = await productDb.getProducts(sort, level, take, categoryId, search);
 
             if (products === undefined || products === null) {
                 res.status(400).json({ status: 400, message: `products Not Exist!` });

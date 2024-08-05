@@ -173,7 +173,7 @@ class Product {
         return user;
     }
 
-    async getProducts(order?: any, highest?: any, take?: any) {
+    async getProducts(order?: any, highest?: any, take?: any, categoryId?: any, search?: any) {
         highest = (highest + '').toLowerCase() === 'true'
         var orderBy = {};
         switch (order) {
@@ -194,6 +194,8 @@ class Product {
         }
 
         const t = take === undefined || take === null ? undefined : Number(take);
+        const ci = categoryId === undefined || categoryId === null ? undefined : Number(categoryId);
+        const s = search === undefined || search === null ? undefined : search;
 
         const products = await prisma.product.findMany({
             select: {
@@ -207,7 +209,14 @@ class Product {
                 createdAt: true
             },
             take: t,
-            orderBy: orderBy
+            orderBy: orderBy,
+            where: {
+                categoryId: ci,
+                name: {
+                    contains: s,
+                    mode: "insensitive"
+                }
+            }
         });
         return products;
     }
