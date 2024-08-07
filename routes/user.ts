@@ -6,6 +6,7 @@ import { authentication } from "../middlewares/auth";
 const router = express.Router()
 
 router.get('/profile', validatiors.login, authentication.auth, userController.getUser);
+router.get('/liked', authentication.auth, userController.getLikedProduct);
 router.post('/login', validatiors.register, userController.loginUser);
 router.post('/register', validatiors.register, userController.postUser);
 router.put('/user/username', validatiors.editName, authentication.auth, userController.putUsername);

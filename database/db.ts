@@ -21,12 +21,30 @@ class User {
                     id: true,
                     username: true,
                     password: false,
+                    carts: true,
+                    likes: true
                 }
 
             }
         );
 
         return user;
+    }
+
+    async getUserLikes(req: Request) {
+        const token = (req as CustomRequest).token as JwtPayload;
+        const userId = token.id;
+
+        const likes = await prisma.user.findUnique({
+            where: {
+                id: Number(userId)
+            },
+            select: {
+                likes: true
+            }
+        })
+
+        return likes;
     }
 
     async createUser(req: Request) {
@@ -182,6 +200,8 @@ class Product {
         return user;
     }
 
+
+
     async getProducts(req: Request) {
         const page = req.query.page;
         const sort = req.query.sort;
@@ -284,6 +304,36 @@ class category {
 export const categoryDb = new category();
 
 class Like {
+    async getLikedProduct(req: Request) {
+        const user = await userDb.getUserLikes(req);
+        var products: any = [];
+        if (user !== null) {
+            for (let index = 0; index < user.likes.length; index++) {
+                const element = user.likes[index];
+                const product = await prisma.product.findUnique({
+                    where: {
+                        id: Number(element.productId)
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        price: true,
+                        isAvailable: true,
+                        mainImageUrl: true,
+                        rate: true,
+                        category: true,
+                        createdAt: true,
+                    },
+                });
+                products.push(product);
+
+            }
+        }
+
+        return products;
+
+
+    }
     async setLike(req: Request) {
         const like = await prisma.like.create({
             data: {
@@ -337,3 +387,104 @@ class Like {
 
 export const likeDb = new Like();
 
+class Cart {
+    async getCarts(req: Request) {
+        const token = (req as CustomRequest).token as JwtPayload;
+        const userId = token.id;
+        const carts = await prisma.cart.findMany({
+            where: {
+                userId: userId
+            },
+            include: {
+                products: {
+                    include: {
+                        product: {
+                            select: {
+                                id: true,
+                                name: true,
+                                price: true,
+                                isAvailable: true,
+                                mainImageUrl: true,
+                                rate: true,
+                                category: true,
+                                createdAt: true,
+                                likes: {
+                                    where: {
+                                        userId: userId
+                                    },
+                                }
+                            },
+                        }
+                    }
+                },
+            }
+
+        });
+        return carts;
+    }
+
+    async getCart(id: number) {
+        const cart = await prisma.cart.findUnique({
+            where: {
+                id: id
+            }
+        });
+        return cart;
+    }
+
+    async addCart(req: Request) {
+        const cart = await prisma.cart.create(
+            {
+                data: req.body,
+            }
+        )
+        return cart;
+    }
+
+    async addItem(req: Request) {
+        const isAvailable = await prisma.itemInCart.findUnique({
+            where: {
+                cartId_productId: {
+                    cartId: Number(req.params.id),
+                    productId: req.body.productId
+                }
+            }
+        });
+        console.log(isAvailable);
+
+        var cart: any;
+        if (isAvailable === null || isAvailable === undefined) {
+            cart = await prisma.itemInCart.create(
+                {
+                    data: {
+                        count: req.body.count,
+                        cartId: Number(req.params.id),
+                        productId: req.body.productId
+                    },
+
+                }
+            )
+        } else {
+            cart = await prisma.itemInCart.update(
+                {
+                    where: {
+                        cartId_productId: {
+                            cartId: Number(isAvailable?.cartId),
+                            productId: Number(isAvailable?.productId)
+                        }
+                    },
+                    data: {
+                        count: req.body.count,
+                    }
+
+                }
+            )
+
+
+        }
+        console.log(cart);
+
+        return cart;
+    }
+}
+export const cartDb = new Cart();

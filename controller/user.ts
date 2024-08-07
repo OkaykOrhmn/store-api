@@ -1,4 +1,4 @@
-import { userDb } from "../database/db";
+import { userDb, likeDb } from "../database/db";
 import { Request, Response } from "express";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { authentication, CustomRequest } from "../middlewares/auth";
@@ -7,6 +7,28 @@ import validRequest from "../utils/validationResult";
 import { passwordCreate } from "../utils/passwordCreate";
 
 class User {
+
+    async getLikedProduct(req: Request, res: Response) {
+        validRequest(req, res)
+
+        try {
+
+            const products = await likeDb.getLikedProduct(req);
+
+            if (products === undefined || products === null) {
+                res.status(400).json({ status: 400, message: `products Not Exist!` });
+            } else {
+                res.status(200).json({ status: 200, liked: products });
+
+            }
+
+        } catch (e) {
+
+            res.status(500).json({ status: 500, message: e });
+        }
+
+    }
+
     async getUser(req: Request, res: Response) {
         validRequest(req, res);
 

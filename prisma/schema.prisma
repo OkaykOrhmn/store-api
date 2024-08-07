@@ -27,7 +27,27 @@ model User {
   username String @unique 
   password String
   likes Like[]
+  carts Cart[]
   // cars Car[]
+}
+model Cart{
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+  name String
+  userId Int
+  status Int @default(1) // Statuses is : 1 onWait, 2 onWay, 3 completed, 0 canceled
+  products ItemInCart[]
+
+}
+
+model ItemInCart {
+  product Product @relation(fields: [productId], references: [id],onDelete: Cascade)
+  productId Int
+  cart Cart @relation(fields: [cartId], references: [id],onDelete: Cascade)
+  cartId Int
+  count Int
+  @@id([cartId, productId])
+
 }
 
 model Product{
@@ -44,6 +64,7 @@ model Product{
   highlights Highlight[]
   createdAt DateTime  @default(now())
   likes Like[]
+  products ItemInCart[]
 }
 
 model Highlight{
