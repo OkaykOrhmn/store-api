@@ -391,12 +391,14 @@ class Cart {
     async getCarts(req: Request) {
         const token = (req as CustomRequest).token as JwtPayload;
         const userId = token.id;
+        const isProdoct = req.query.p;
+
         const carts = await prisma.cart.findMany({
             where: {
                 userId: userId
             },
             include: {
-                products: {
+                products: isProdoct === null || isProdoct === undefined ? false : {
                     include: {
                         product: {
                             select: {
@@ -485,6 +487,34 @@ class Cart {
         console.log(cart);
 
         return cart;
+    }
+
+    async deleteItemInCarts(req: Request) {
+        const id = Number(req.params.id);
+        const productId = Number(req.params.productId);
+        const productInCart = await prisma.itemInCart.delete({
+            where: {
+                cartId_productId: {
+                    cartId: id,
+                    productId: productId
+                }
+            }
+        });
+
+        if (productInCart.count === 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    async deleteCart(req: Request) {
+        const id = Number(req.params.id);
+        const productInCart = await prisma.cart.delete({
+            where: {
+                id: id
+            }
+        });
     }
 }
 export const cartDb = new Cart();

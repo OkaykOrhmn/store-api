@@ -5,6 +5,10 @@ const cartId = param("id")
     .isInt()
     .withMessage(validationMessages.isInt);
 
+const productIdInP = param("productId")
+    .isInt()
+    .withMessage(validationMessages.isInt);
+
 const userId = body("userId")
     .isInt()
     .withMessage(validationMessages.isInt);
@@ -30,6 +34,9 @@ const count = body("count")
 export const validatiors = {
     cartId: [cartId],
     cart: [userId, name],
-    editcart: [cartId, productId, count]
+    editcart: [cartId, productId, count],
+    deleteCart: [cartId],
+    deleteProductCart: [cartId, productIdInP],
+
 
 }
